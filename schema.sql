@@ -50,3 +50,11 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+USE farmacia_inkafarma;
+
+INSERT INTO products (sku, name, category, presentation, stock, min_stock, price) VALUES
+('DEM-001', 'Paracetamol 500 mg', 'Analgésicos', 'Caja x 100 tabletas', 50, 10, 12.50),
+('DEM-002', 'Alcohol Medicinal 70°', 'Antisépticos', 'Frasco x 120 ml', 40, 10, 4.50),
+('DEM-003', 'Protector Solar FPS 50', 'Dermocosmética', 'Frasco x 50 ml', 25, 5, 65.00),
+('DEM-004', 'Vitamina C 500 mg', 'Vitaminas', 'Frasco x 60 tabletas', 35, 8, 28.90);
