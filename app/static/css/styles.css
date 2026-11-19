@@ -503,6 +503,10 @@ textarea {
   box-shadow: 0 7px 18px rgba(157, 28, 51, 0.08);
 }
 
+.product-symbol[hidden] {
+  display: none;
+}
+
 .product-category {
   position: absolute;
   right: 12px;

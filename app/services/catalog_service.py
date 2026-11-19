@@ -13,7 +13,7 @@ def list_public_products(search="", category="", limit=None):
         query = query.filter(Product.name.ilike(f"%{search}%"))
     if category:
         query = query.filter_by(category=category)
-    query = query.order_by(Product.name)
+    query = query.order_by(Product.sku)
     if limit:
         query = query.limit(limit)
     return query.all()

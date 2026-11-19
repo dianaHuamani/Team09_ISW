@@ -27,11 +27,10 @@
     {% for p in products %}
     <article class="product-card">
       <div class="product-visual">
-        <img src="{{ url_for('static', filename='img/' + p.sku + '.jpg') }}" 
-             data-fallback="{{ url_for('static', filename='img/default.jpg') }}"
-             onerror="this.onerror=null; this.src=this.dataset.fallback;"
-             alt="{{ p.name }}" 
-             class="product-img">
+        <img class="product-img" src="{{ url_for('static', filename='img/' ~ (p.sku|upper) ~ '.jpg') }}"
+             alt="{{ p.name }}" loading="lazy"
+             onerror="this.onerror=null; this.hidden=true; this.nextElementSibling.hidden=false;">
+        <span class="product-symbol" hidden aria-hidden="true">✚</span>
         <span class="product-category">{{ p.category }}</span>
       </div>
       <div class="product-info">
