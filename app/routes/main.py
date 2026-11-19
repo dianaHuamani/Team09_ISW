@@ -1,6 +1,8 @@
 from datetime import date
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from pathlib import Path
+
+from flask import Blueprint, current_app, flash, redirect, render_template, request, send_from_directory, url_for
 
 from app.constants import APPOINTMENT_SERVICES
 from app.services.appointment_service import request_appointment
@@ -8,6 +10,12 @@ from app.services.catalog_service import list_public_categories, list_public_pro
 from app.services.contact_service import submit_contact_message
 
 bp = Blueprint("main", __name__)
+
+
+@bp.route("/sitemap.xml")
+def sitemap():
+    project_root = Path(current_app.root_path).parent
+    return send_from_directory(project_root, "sitemap.xml", mimetype="application/xml")
 
 
 @bp.app_context_processor
