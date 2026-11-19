@@ -1,4 +1,5 @@
 import os
+import warnings
 from pathlib import Path
 from urllib.parse import quote_plus
 
@@ -25,10 +26,15 @@ class Config:
         if host:
             user = quote_plus(os.getenv("DB_USER", ""))
             password = quote_plus(os.getenv("DB_PASSWORD", ""))
-            name = quote_plus(os.getenv("DB_NAME", "farmacia"))
+            name = quote_plus(os.getenv("DB_NAME", "farmacia_inkafarma"))
             port = os.getenv("DB_PORT", "3306")
             return f"mysql+pymysql://{user}:{password}@{host}:{port}/{name}?charset=utf8mb4"
 
+        warnings.warn(
+            "DATABASE_URL no está configurada; la aplicación usará SQLite local, no RDS.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
         instance_dir = BASE_DIR / "instance"
         instance_dir.mkdir(exist_ok=True)
         return f"sqlite:///{instance_dir / 'farmacia.db'}"
