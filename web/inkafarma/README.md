@@ -35,6 +35,8 @@ SECRET_KEY=una-clave-larga-y-aleatoria
 FLASK_DEBUG=0
 ```
 
+El archivo `schema.sql` crea la base `farmacia_inkafarma` y las tres tablas del proyecto. Si usas ese nombre, configura el mismo nombre en `DATABASE_URL` (o `DB_NAME`). Si RDS no permite `CREATE DATABASE`, selecciona la base al crear la instancia y quita del script las sentencias `CREATE DATABASE` y `USE` antes de ejecutarlo.
+
 También se aceptan `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` y `DB_NAME`. La base de datos debe existir y el usuario configurado necesita permisos para crear las tablas al iniciar la aplicación. Permite el acceso desde el servidor web en el grupo de seguridad de RDS. No publiques `.env` ni guardes credenciales en Git.
 
 El sitio muestra productos registrados con stock mayor que cero y sin vencimiento pasado. Si el catálogo está vacío, carga los productos desde tu proceso administrativo separado.
@@ -44,9 +46,11 @@ El sitio muestra productos registrados con stock mayor que cero y sin vencimient
 ```text
 app/
   config.py          Configuración SQLite / RDS
-  extensions.py      SQLAlchemy
-  models.py          Productos, solicitudes de cita y contactos
-  routes.py          Páginas públicas y formularios
+  database.py        SQLAlchemy
+  constants.py       Estados y servicios
+  models/            Producto, cita y contacto
+  routes/            Rutas públicas Flask
+  services/          Catálogo, citas y contactos
   templates/         Sitio web con Jinja
   static/css/        Estilos adaptables
   static/js/         Menú móvil y avisos
