@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Administrar productos{% endblock %}
+{% block content %}
+<section class="admin-shell admin-wide"><div class="admin-heading"><div><span class="eyebrow">Área interna</span><h1>Productos</h1><p>Administra los productos y su categoría asociada.</p></div>
+  <div class="admin-actions"><a class="admin-button" href="{{ url_for('main.admin_product_create') }}">＋ Nuevo producto</a><form method="post" action="{{ url_for('main.admin_logout') }}"><input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}"><button class="admin-button secondary" type="submit">Cerrar sesión</button></form></div>
+</div>
+<div class="admin-card table-wrap"><table class="admin-table"><thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Presentación</th><th>Stock</th><th>Precio</th><th>Vencimiento</th><th>Acciones</th></tr></thead><tbody>
+{% for product in products %}<tr><td>{{ product.sku }}</td><td>{{ product.name }}</td><td>{{ product.category }}</td><td>{{ product.presentation }}</td><td>{{ product.stock }}</td><td>S/ {{ '%.2f'|format(product.price) }}</td><td>{{ product.expiry_date or '—' }}</td><td><div class="row-actions"><a href="{{ url_for('main.admin_product_edit', product_id=product.id) }}">Editar</a><form method="post" action="{{ url_for('main.admin_product_delete', product_id=product.id) }}" onsubmit="return confirm('¿Eliminar este producto?')"><input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}"><button class="text-danger" type="submit">Eliminar</button></form></div></td></tr>{% else %}<tr><td colspan="8" class="empty-state">Todavía no hay productos registrados.</td></tr>{% endfor %}
+</tbody></table></div><p class="admin-note">Relación: cada producto pertenece a una categoría; la categoría se muestra en esta lista.</p></section>
+{% endblock %}

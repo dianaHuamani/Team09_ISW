@@ -17,15 +17,19 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         if app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite:"):
-            from app.models import Product
+            from app.models import Category, Product
 
             if Product.query.count() == 0:
+                category_names = ["Analgésicos", "Antisépticos", "Dermocosmética", "Vitaminas"]
+                categories = {name: Category(name=name) for name in category_names}
+                db.session.add_all(categories.values())
+                db.session.flush()
                 db.session.add_all(
                     [
                         Product(
                             sku="DEM-001",
                             name="Paracetamol 500 mg",
-                            category="Analgésicos",
+                            category_ref=categories["Analgésicos"],
                             presentation="Caja x 100 tabletas",
                             stock=50,
                             min_stock=10,
@@ -34,7 +38,7 @@ def create_app(config_class=Config):
                         Product(
                             sku="DEM-002",
                             name="Alcohol Medicinal 70°",
-                            category="Antisépticos",
+                            category_ref=categories["Antisépticos"],
                             presentation="Frasco x 120 ml",
                             stock=40,
                             min_stock=10,
@@ -43,7 +47,7 @@ def create_app(config_class=Config):
                         Product(
                             sku="DEM-003",
                             name="Protector Solar FPS 50",
-                            category="Dermocosmética",
+                            category_ref=categories["Dermocosmética"],
                             presentation="Frasco x 50 ml",
                             stock=25,
                             min_stock=5,
@@ -52,7 +56,7 @@ def create_app(config_class=Config):
                         Product(
                             sku="DEM-004",
                             name="Vitamina C 500 mg",
-                            category="Vitaminas",
+                            category_ref=categories["Vitaminas"],
                             presentation="Frasco x 60 tabletas",
                             stock=35,
                             min_stock=8,

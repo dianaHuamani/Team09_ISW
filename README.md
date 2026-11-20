@@ -9,7 +9,11 @@ Sitio público de presentación para una farmacia. Muestra información, un cat�
 - Enviar un mensaje desde **Contáctanos**.
 - Enviar una solicitud de cita con un servicio y horario preferido. La farmacia debe confirmar la disponibilidad por teléfono.
 
-El sitio **no permite crear, editar ni eliminar productos**, ni administrar inventario o revisar mensajes y citas. Esas tareas corresponden a un sistema interno separado. El catálogo consulta los productos del mismo esquema MySQL/SQLite; la aplicación pública solo tiene rutas de lectura para productos.
+El catálogo público es de solo lectura. La administración de productos está disponible en un área interna con inicio de sesión.
+
+## Administración de productos (demo académica)
+
+La opción **Iniciar sesión** del encabezado abre el área administrativa en `/admin/login`. Desde allí se puede crear, listar, actualizar y eliminar productos. Cada producto tiene una relación muchos-a-uno con `categories` mediante `products.category_id`, y la categoría asociada aparece en el formulario y en el listado. Configura `ADMIN_USERNAME` y `ADMIN_PASSWORD` en `.env`; para la demostración local se usan `admin` / `admin123`. Cambia esas credenciales y `SECRET_KEY` antes de desplegar. `schema.sql` crea la tabla de categorías y la relación para una base nueva. Para migrar la base de la versión anterior, respáldala y ejecuta `migrate_categories.sql` una vez antes de iniciar la app nueva.
 
 ## Ejecutar en Windows / PowerShell
 

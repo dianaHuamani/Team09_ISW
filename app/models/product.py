@@ -9,7 +9,12 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sku = db.Column(db.String(32), unique=True, nullable=False, index=True)
     name = db.Column(db.String(140), nullable=False, index=True)
-    category = db.Column(db.String(80), nullable=False, default="General")
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"), nullable=False)
+    category_ref = db.relationship("Category", back_populates="products")
+
+    @property
+    def category(self):
+        return self.category_ref.name if self.category_ref else "General"
     presentation = db.Column(db.String(80), nullable=False, default="Unidad")
     stock = db.Column(db.Integer, nullable=False, default=0)
     min_stock = db.Column(db.Integer, nullable=False, default=5)

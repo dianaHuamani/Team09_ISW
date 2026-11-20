@@ -2,7 +2,7 @@ from datetime import date
 
 from sqlalchemy import or_
 
-from app.models import Product
+from app.models import Category, Product
 
 
 def list_public_products(search="", category="", limit=None):
@@ -12,7 +12,7 @@ def list_public_products(search="", category="", limit=None):
     if search:
         query = query.filter(Product.name.ilike(f"%{search}%"))
     if category:
-        query = query.filter_by(category=category)
+        query = query.join(Product.category_ref).filter(Category.name == category)
     query = query.order_by(Product.sku)
     if limit:
         query = query.limit(limit)
@@ -22,9 +22,10 @@ def list_public_products(search="", category="", limit=None):
 def list_public_categories():
     return [
         row[0]
-        for row in Product.query.with_entities(Product.category)
+        for row in Category.query.join(Category.products)
         .filter(Product.stock > 0)
+        .with_entities(Category.name)
         .distinct()
-        .order_by(Product.category)
+        .order_by(Category.name)
         .all()
     ]
