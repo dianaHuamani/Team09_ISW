@@ -1,4 +1,7 @@
+import os
+
 from flask import Flask
+from werkzeug.security import generate_password_hash
 
 from app.config import Config
 from app.database import db
@@ -16,6 +19,20 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
+        from app.models import AdminUser
+
+        primary_username = os.getenv("ADMIN_USERNAME", "admin").strip() or "admin"
+        primary_password = os.getenv("ADMIN_PASSWORD", "admin123")
+        primary = AdminUser.query.filter_by(role="primary").first()
+        if primary is None:
+            primary = AdminUser(
+                username=primary_username,
+                password_hash=generate_password_hash(primary_password),
+                role="primary",
+                active=True,
+            )
+            db.session.add(primary)
+            db.session.commit()
         if app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite:"):
             from app.models import Category, Product
 

@@ -1,26 +1,39 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 import hmac
-import os
 import secrets
 
 from pathlib import Path
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, send_from_directory, session, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.constants import APPOINTMENT_SERVICES
 from app.services.appointment_service import request_appointment
 from app.services.catalog_service import list_public_categories, list_public_products
 from app.services.contact_service import submit_contact_message
 from app.database import db
-from app.models import Appointment, Category, ContactMessage, Product
+from app.models import AdminUser, Appointment, Category, ContactMessage, Product
 
 bp = Blueprint("main", __name__)
 
 
 def admin_required():
-    if not session.get("admin_logged_in"):
+    user = db.session.get(AdminUser, session.get("admin_user_id"))
+    if not user or not user.active:
+        session.clear()
         return redirect(url_for("main.admin_login"))
+    return None
+
+
+def principal_required():
+    auth = admin_required()
+    if auth:
+        return auth
+    user = db.session.get(AdminUser, session.get("admin_user_id"))
+    if user.role != "primary":
+        flash("Solo el usuario principal puede administrar cuentas.", "error")
+        return redirect(url_for("main.admin_products"))
     return None
 
 
@@ -31,17 +44,18 @@ def valid_csrf():
 @bp.route("/admin", methods=["GET", "POST"])
 @bp.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
-    if session.get("admin_logged_in"):
+    if session.get("admin_user_id"):
         return redirect(url_for("main.admin_products"))
     if request.method == "POST":
         if not valid_csrf():
             flash("La sesión del formulario venció. Intenta de nuevo.", "error")
         else:
-            username = os.getenv("ADMIN_USERNAME", "admin")
-            password = os.getenv("ADMIN_PASSWORD", "admin123")
-            if hmac.compare_digest(request.form.get("username", ""), username) and hmac.compare_digest(request.form.get("password", ""), password):
+            username = request.form.get("username", "").strip()
+            user = AdminUser.query.filter_by(username=username).first()
+            if user and user.active and check_password_hash(user.password_hash, request.form.get("password", "")):
                 session.clear()
-                session["admin_logged_in"] = True
+                session["admin_user_id"] = user.id
+                session["admin_role"] = user.role
                 session["csrf_token"] = secrets.token_urlsafe(32)
                 return redirect(url_for("main.admin_products"))
             flash("Usuario o contraseña incorrectos.", "error")
@@ -84,6 +98,149 @@ def admin_appointments():
         return auth
     appointments = Appointment.query.order_by(Appointment.created_at.desc()).all()
     return render_template("admin_appointments.html", appointments=appointments)
+
+
+@bp.route("/admin/usuarios", methods=["GET", "POST"])
+def admin_users():
+    auth = principal_required()
+    if auth:
+        return auth
+    if request.method == "POST":
+        if not valid_csrf():
+            flash("La sesión del formulario venció. Intenta de nuevo.", "error")
+        else:
+            username = request.form.get("username", "").strip()
+            password = request.form.get("password", "")
+            if not username or len(username) > 80 or not username.replace("_", "").replace("-", "").isalnum():
+                flash("El usuario debe tener hasta 80 caracteres y usar letras, números, guion o guion bajo.", "error")
+            elif len(password) < 8:
+                flash("La contraseña debe tener al menos 8 caracteres.", "error")
+            elif AdminUser.query.filter_by(username=username).first():
+                flash("Ese usuario ya existe.", "error")
+            else:
+                db.session.add(AdminUser(username=username, password_hash=generate_password_hash(password), role="secondary", active=True))
+                db.session.commit()
+                flash("Usuario secundario creado.", "success")
+                return redirect(url_for("main.admin_users"))
+    users = AdminUser.query.order_by(AdminUser.role, AdminUser.username).all()
+    return render_template("admin_users.html", users=users)
+
+
+@bp.route("/admin/usuarios/<int:user_id>/editar", methods=["GET", "POST"])
+def admin_user_edit(user_id):
+    auth = principal_required()
+    if auth:
+        return auth
+    user = db.get_or_404(AdminUser, user_id)
+    if user.role == "primary":
+        flash("La cuenta principal se configura con ADMIN_USERNAME y ADMIN_PASSWORD.", "error")
+        return redirect(url_for("main.admin_users"))
+    if request.method == "POST":
+        if not valid_csrf():
+            flash("La sesión del formulario venció. Intenta de nuevo.", "error")
+        else:
+            username = request.form.get("username", "").strip()
+            password = request.form.get("password", "")
+            duplicate = AdminUser.query.filter(AdminUser.username == username, AdminUser.id != user.id).first()
+            if not username or len(username) > 80 or duplicate:
+                flash("Escribe un usuario válido que no esté en uso.", "error")
+            elif password and len(password) < 8:
+                flash("La contraseña nueva debe tener al menos 8 caracteres.", "error")
+            else:
+                user.username = username
+                user.active = request.form.get("active") == "on"
+                if password:
+                    user.password_hash = generate_password_hash(password)
+                db.session.commit()
+                flash("Usuario secundario actualizado.", "success")
+                return redirect(url_for("main.admin_users"))
+    return render_template("admin_user_form.html", item=user)
+
+
+@bp.route("/admin/usuarios/<int:user_id>/eliminar", methods=["POST"])
+def admin_user_delete(user_id):
+    auth = principal_required()
+    if auth:
+        return auth
+    user = db.get_or_404(AdminUser, user_id)
+    if not valid_csrf():
+        flash("La sesión del formulario venció.", "error")
+    elif user.role == "primary":
+        flash("No se puede eliminar la cuenta principal.", "error")
+    else:
+        db.session.delete(user)
+        db.session.commit()
+        flash("Usuario secundario eliminado.", "success")
+    return redirect(url_for("main.admin_users"))
+
+
+@bp.route("/admin/contactos/<int:message_id>/editar", methods=["GET", "POST"])
+def admin_contact_edit(message_id):
+    auth = admin_required()
+    if auth:
+        return auth
+    message = db.get_or_404(ContactMessage, message_id)
+    if request.method == "POST":
+        if not valid_csrf():
+            flash("La sesión del formulario venció. Intenta de nuevo.", "error")
+        else:
+            name = request.form.get("name", "").strip()
+            email = request.form.get("email", "").strip()
+            phone = request.form.get("phone", "").strip()
+            subject = request.form.get("subject", "").strip()
+            body = request.form.get("message", "").strip()
+            status = request.form.get("status", "").strip()
+            from app.services.contact_service import EMAIL_PATTERN
+            if (not name or len(name) > 120 or not EMAIL_PATTERN.fullmatch(email) or len(email) > 160
+                    or len(phone) > 30 or not subject or len(subject) > 140
+                    or len(body) < 10 or len(body) > 4000 or status not in {"Pendiente", "Revisado", "Respondido"}):
+                flash("Revisa los datos: verifica el correo, los límites de caracteres y el estado.", "error")
+            else:
+                message.name, message.email, message.phone = name, email, phone or None
+                message.subject, message.message, message.status = subject, body, status
+                db.session.commit()
+                flash("Mensaje actualizado.", "success")
+                return redirect(url_for("main.admin_contacts"))
+    return render_template("admin_contact_form.html", item=message)
+
+
+@bp.route("/admin/citas/<int:appointment_id>/editar", methods=["GET", "POST"])
+def admin_appointment_edit(appointment_id):
+    auth = admin_required()
+    if auth:
+        return auth
+    appointment = db.get_or_404(Appointment, appointment_id)
+    if request.method == "POST":
+        if not valid_csrf():
+            flash("La sesión del formulario venció. Intenta de nuevo.", "error")
+        else:
+            patient_name = request.form.get("patient_name", "").strip()
+            phone = request.form.get("phone", "").strip()
+            service = request.form.get("service", "").strip()
+            professional = request.form.get("professional", "").strip()
+            status = request.form.get("status", "").strip()
+            notes = request.form.get("notes", "").strip()
+            try:
+                appointment_at = datetime.fromisoformat(request.form.get("appointment_at", ""))
+            except ValueError:
+                appointment_at = None
+            if (not patient_name or len(patient_name) > 140 or not phone or len(phone) > 30
+                    or service not in APPOINTMENT_SERVICES or not appointment_at
+                    or not professional or len(professional) > 100 or not status or len(status) > 20
+                    or len(notes) > 300):
+                flash("Revisa los datos de la cita y sus límites de caracteres.", "error")
+            else:
+                appointment.patient_name = patient_name
+                appointment.phone = phone
+                appointment.service = service
+                appointment.professional = professional
+                appointment.appointment_at = appointment_at
+                appointment.status = status
+                appointment.notes = notes or None
+                db.session.commit()
+                flash("Solicitud de cita actualizada.", "success")
+                return redirect(url_for("main.admin_appointments"))
+    return render_template("admin_appointment_form.html", item=appointment, services=APPOINTMENT_SERVICES)
 
 
 def product_form(product=None):

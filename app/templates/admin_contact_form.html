@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Editar mensaje{% endblock %}
+{% block content %}
+<section class="admin-shell"><div class="admin-card"><span class="eyebrow">Administración</span><h1>Editar mensaje de contacto</h1><p>Recibido el {{ item.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+<form method="post" class="admin-form"><input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}">
+<label>Nombre<input name="name" maxlength="120" required value="{{ request.form.get('name', item.name) }}"></label><label>Correo<input type="email" name="email" maxlength="160" required value="{{ request.form.get('email', item.email) }}"></label><label>Teléfono<input name="phone" maxlength="30" value="{{ request.form.get('phone', item.phone or '') }}"></label><label>Asunto<input name="subject" maxlength="140" required value="{{ request.form.get('subject', item.subject) }}"></label><label>Mensaje<textarea name="message" rows="6" minlength="10" maxlength="4000" required>{{ request.form.get('message', item.message) }}</textarea></label>
+<label>Estado<select name="status">{% for status in ['Pendiente', 'Revisado', 'Respondido'] %}<option value="{{ status }}" {% if request.form.get('status', item.status) == status %}selected{% endif %}>{{ status }}</option>{% endfor %}</select></label><div class="form-actions"><button class="admin-button" type="submit">Guardar cambios</button><a class="admin-button secondary" href="{{ url_for('main.admin_contacts') }}">Cancelar</a></div></form></div></section>
+{% endblock %}

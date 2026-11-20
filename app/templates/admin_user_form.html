@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}Editar usuario{% endblock %}
+{% block content %}
+<section class="admin-shell"><div class="admin-card"><span class="eyebrow">Administración principal</span><h1>Editar usuario secundario</h1><form method="post" class="admin-form"><input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}"><label>Usuario<input name="username" maxlength="80" required value="{{ request.form.get('username', item.username) }}"></label><label>Nueva contraseña<input type="password" name="password" minlength="8" autocomplete="new-password"><span class="form-help">Déjala vacía para conservar la actual.</span></label><label class="checkbox-label"><input type="checkbox" name="active" {% if request.method == 'POST' and request.form.get('active') or request.method == 'GET' and item.active %}checked{% endif %}> Cuenta activa</label><div class="form-actions"><button class="admin-button" type="submit">Guardar cambios</button><a class="admin-button secondary" href="{{ url_for('main.admin_users') }}">Cancelar</a></div></form></div></section>
+{% endblock %}

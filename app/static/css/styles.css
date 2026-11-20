@@ -44,6 +44,14 @@
 .admin-tabs a { padding: 9px 13px; border: 1px solid var(--line); border-radius: 8px; color: #625d63; font-size: 12px; font-weight: 700; }
 .admin-tabs a:hover, .admin-tabs a.active { border-color: #f0cbd2; background: #fff5f6; color: var(--red); }
 .message-cell { min-width: 260px; max-width: 440px; white-space: normal; line-height: 1.5; }
+.inline-user-form { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; }
+.inline-user-form label { display: grid; gap: 7px; min-width: 220px; font-size: 13px; font-weight: 600; }
+.inline-user-form input { min-height: 43px; border: 1px solid #ded8db; border-radius: 9px; padding: 9px 12px; }
+.user-create { margin-bottom: 20px; }
+.user-create h2 { margin: 0 0 16px; font: 700 18px Manrope, sans-serif; }
+.form-help { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
+.checkbox-label { display: flex !important; grid-template-columns: auto 1fr !important; align-items: center; }
+.checkbox-label input { width: 18px; min-height: 18px; }
 .product-form { grid-template-columns: 1fr 1fr; }
 .product-form .form-actions { grid-column: 1 / -1; margin-top: 5px; }
 @media (max-width: 700px) { .admin-heading { align-items: flex-start; flex-direction: column; } .admin-actions { flex-wrap: wrap; } .admin-card { padding: 23px; } .product-form { grid-template-columns: 1fr; } .product-form .form-actions { grid-column: auto; } }
