@@ -40,6 +40,10 @@
 .row-actions .text-danger { color: var(--red); }
 .empty-state { padding: 28px !important; text-align: center !important; color: var(--muted); }
 .admin-note { font-size: 12px; }
+.admin-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.admin-tabs a { padding: 9px 13px; border: 1px solid var(--line); border-radius: 8px; color: #625d63; font-size: 12px; font-weight: 700; }
+.admin-tabs a:hover, .admin-tabs a.active { border-color: #f0cbd2; background: #fff5f6; color: var(--red); }
+.message-cell { min-width: 260px; max-width: 440px; white-space: normal; line-height: 1.5; }
 .product-form { grid-template-columns: 1fr 1fr; }
 .product-form .form-actions { grid-column: 1 / -1; margin-top: 5px; }
 @media (max-width: 700px) { .admin-heading { align-items: flex-start; flex-direction: column; } .admin-actions { flex-wrap: wrap; } .admin-card { padding: 23px; } .product-form { grid-template-columns: 1fr; } .product-form .form-actions { grid-column: auto; } }

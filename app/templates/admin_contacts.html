@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Mensajes de contacto{% endblock %}
+{% block content %}
+<section class="admin-shell admin-wide"><div class="admin-heading"><div><span class="eyebrow">Área interna</span><h1>Mensajes de contacto</h1><p>Mensajes enviados desde el formulario público.</p><nav class="admin-tabs"><a href="{{ url_for('main.admin_products') }}">Productos</a><a class="active" href="{{ url_for('main.admin_contacts') }}">Mensajes de contacto</a><a href="{{ url_for('main.admin_appointments') }}">Citas médicas</a></nav></div>
+  <form method="post" action="{{ url_for('main.admin_logout') }}"><input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}"><button class="admin-button secondary" type="submit">Cerrar sesión</button></form></div>
+<div class="admin-card table-wrap"><table class="admin-table"><thead><tr><th>Recibido</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Asunto</th><th>Mensaje</th><th>Estado</th></tr></thead><tbody>
+{% for item in messages %}<tr><td>{{ item.created_at.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ item.name }}</td><td><a href="mailto:{{ item.email }}">{{ item.email }}</a></td><td>{{ item.phone or '—' }}</td><td>{{ item.subject }}</td><td class="message-cell">{{ item.message }}</td><td>{{ item.status }}</td></tr>{% else %}<tr><td colspan="7" class="empty-state">Aún no se han recibido mensajes.</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

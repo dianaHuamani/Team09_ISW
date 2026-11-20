@@ -13,7 +13,7 @@ El catálogo público es de solo lectura. La administración de productos está 
 
 ## Administración de productos (demo académica)
 
-La opción **Iniciar sesión** del encabezado abre el área administrativa en `/admin/login`. Desde allí se puede crear, listar, actualizar y eliminar productos. Cada producto tiene una relación muchos-a-uno con `categories` mediante `products.category_id`, y la categoría asociada aparece en el formulario y en el listado. Configura `ADMIN_USERNAME` y `ADMIN_PASSWORD` en `.env`; para la demostración local se usan `admin` / `admin123`. Cambia esas credenciales y `SECRET_KEY` antes de desplegar. `schema.sql` crea la tabla de categorías y la relación para una base nueva. Para migrar la base de la versión anterior, respáldala y ejecuta `migrate_categories.sql` una vez antes de iniciar la app nueva.
+La opción **Iniciar sesión** del encabezado abre el área administrativa en `/admin/login`. Desde allí se puede crear, listar, actualizar y eliminar productos; revisar los mensajes enviados desde Contáctanos y las solicitudes de citas médicas. Cada producto tiene una relación muchos-a-uno con `categories` mediante `products.category_id`, y la categoría asociada aparece en el formulario y en el listado. Configura `ADMIN_USERNAME` y `ADMIN_PASSWORD` en `.env`; para la demostración local se usan `admin` / `admin123`. Cambia esas credenciales y `SECRET_KEY` antes de desplegar. `schema.sql` crea la tabla de categorías y la relación para una base nueva. Para migrar la base de la versión anterior, respáldala y ejecuta `migrate_categories.sql` una vez antes de iniciar la app nueva.
 
 ## Ejecutar en Windows / PowerShell
 

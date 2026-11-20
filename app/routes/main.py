@@ -13,7 +13,7 @@ from app.services.appointment_service import request_appointment
 from app.services.catalog_service import list_public_categories, list_public_products
 from app.services.contact_service import submit_contact_message
 from app.database import db
-from app.models import Category, Product
+from app.models import Appointment, Category, ContactMessage, Product
 
 bp = Blueprint("main", __name__)
 
@@ -66,6 +66,24 @@ def admin_products():
         return auth
     products = Product.query.join(Category).order_by(Product.sku).all()
     return render_template("admin_products.html", products=products)
+
+
+@bp.route("/admin/contactos")
+def admin_contacts():
+    auth = admin_required()
+    if auth:
+        return auth
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
+    return render_template("admin_contacts.html", messages=messages)
+
+
+@bp.route("/admin/citas")
+def admin_appointments():
+    auth = admin_required()
+    if auth:
+        return auth
+    appointments = Appointment.query.order_by(Appointment.created_at.desc()).all()
+    return render_template("admin_appointments.html", appointments=appointments)
 
 
 def product_form(product=None):

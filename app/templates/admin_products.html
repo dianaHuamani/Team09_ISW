@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Administrar productos{% endblock %}
 {% block content %}
-<section class="admin-shell admin-wide"><div class="admin-heading"><div><span class="eyebrow">Área interna</span><h1>Productos</h1><p>Administra los productos y su categoría asociada.</p></div>
+<section class="admin-shell admin-wide"><div class="admin-heading"><div><span class="eyebrow">Área interna</span><h1>Productos</h1><p>Administra los productos y su categoría asociada.</p><nav class="admin-tabs"><a class="active" href="{{ url_for('main.admin_products') }}">Productos</a><a href="{{ url_for('main.admin_contacts') }}">Mensajes de contacto</a><a href="{{ url_for('main.admin_appointments') }}">Citas médicas</a></nav></div>
   <div class="admin-actions"><a class="admin-button" href="{{ url_for('main.admin_product_create') }}">＋ Nuevo producto</a><form method="post" action="{{ url_for('main.admin_logout') }}"><input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}"><button class="admin-button secondary" type="submit">Cerrar sesión</button></form></div>
 </div>
 <div class="admin-card table-wrap"><table class="admin-table"><thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Presentación</th><th>Stock</th><th>Precio</th><th>Vencimiento</th><th>Acciones</th></tr></thead><tbody>
